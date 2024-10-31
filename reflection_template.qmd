@@ -972,11 +972,11 @@ summary(reg_mod1)
 
 I've revised every "growing" question and several "success" questions up to Lab 4; most of them have been smaller mistakes, but I've tried to leave reflection comments for every revision that shows my understanding of why a revision was necessary:
 
-![Lab 3 Grading](lab3_grading.png)
+![Lab 3 Grading](images/lab3_grading.png)
 
-![Lab 3 Question 3 Revision](revision_reflection.png)
+![Lab 3 Question 3 Revision](images/revision_reflection.png)
 
-![Lab 3 Canvas Comment](revision_comment.png)
+![Lab 3 Canvas Comment](images/revision_comment.png)
 
 <!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
 
@@ -990,11 +990,11 @@ I've tried to experiment more with adding more to my labs than just the informat
 
 <!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
 
-![Lab 4 peer review](lab4_peer_review.png)
+![Lab 4 peer review](images/lab4_peer_review.png)
 
 Discord feedback:
 
-![Lab 5 Discord screenshot](discord.png)
+![Lab 5 Discord screenshot](images/discord.png)
 
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
 
