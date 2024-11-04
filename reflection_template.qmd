@@ -298,6 +298,7 @@ facebook_event_checkin |>
 
 ```{r}
 #| label: wd-5-left
+
 get_fit_now_member |>
   inner_join(get_fit_now_check_in,
              by = join_by(id == membership_id)) |>
@@ -510,7 +511,7 @@ ggplot(data = ca_childcare, mapping = aes(x = mhi_2018,
 -   at least one numeric variable and one categorical variable: Challenge 2
 
 ```{r}
-#| label: dvs-2-num-cat
+#| label: dvs-1-num-cat
 
 ggplot(data = survey_data,
        mapping = aes(x = weight, y = species)) + 
@@ -537,19 +538,68 @@ ggplot(data = survey_data,
        y = "")
 ```
 
--   at least two categorical variables
+-   at least two categorical variables: Challenge 2 spicy
 
 ```{r}
-#| label: dvs-2-cat
+#| label: dvs-1-2cats
 
+ggplot(data = survey_data,
+       mapping = aes(x = weight, y = species)) + 
+  geom_boxplot(aes(color = genus),
+               outliers = FALSE) + 
+  scale_colour_brewer(palette = "Set1") +
+  annotate("text", y = 1:14, x = 250, label = c("Neomota",
+                                                "Chaetodipus",
+                                                "Peromyscus",
+                                                "Perognathus",
+                                                "Reithrodontomys",
+                                                "Sigmodon",
+                                                "Onychomys",
+                                                "Peromyscus",
+                                                "Reithrodontomys",
+                                                "Dipodomys",
+                                                "Dipodomys",
+                                                "Chaetodipus",
+                                                "Dipodomys",
+                                                "Onychromys")) +
+  theme(legend.position = "none") +
+  labs(title = "Rodent Weight Distribution by Species",
+       x = "Weight (g)",
+       y = "")
 
 ```
 
--   dates (timeseries plot)
+-   dates (timeseries plot): Lab 4 Question 6
 
 ```{r}
-#| label: dvs-2-date
+#| label: dvs-1-date
 
+ca_childcare |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+               names_to = "age_group",
+               values_to = "mc_all") |>
+  mutate(age_group = recode(age_group, 
+                            mc_infant = "Infant", 
+                            mc_toddler = "Toddler", 
+                            mc_preschool = "Preschool")) |>
+  ggplot(mapping = aes(x = study_year,
+                       y = mc_all,
+                       color = fct_reorder2(.f = region,
+                                            .x = study_year,
+                                            .y = mc_all))) + 
+  geom_point() + 
+  geom_smooth(method = "loess") + 
+  facet_wrap(~factor(age_group, 
+                     levels = c("Infant",
+                                "Toddler",
+                                "Preschool"))) + 
+  theme_bw() + 
+  labs(x = "Study Year",
+       y = "",
+       title = "Weekly Median Price for Center-Based Childcare ($)",
+       color = "California Region") + 
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) + 
+  scale_y_continuous(limits = c(100, 500))
 
 
 ```
@@ -998,4 +1048,4 @@ Discord feedback:
 
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
 
-I was paired with Daniel for all of the pair programming activities so far, and I think we've learned to work well together. For the first activity it was a little slow and difficult to share the weight of the assignment, but we've discovered each other's strengths and weaknesses and have been able to finish each activity pretty efficiently.
+I was paired with Daniel for all of the pair programming activities so far, and I think we've learned to work well together. For the first activity it was a little slow and difficult to share the weight of the assignment (I find it easier to code alone), but we've discovered eachother's strengths and weaknesses and have been able to finish each activity pretty efficiently.
