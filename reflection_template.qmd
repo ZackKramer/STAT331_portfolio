@@ -19,14 +19,13 @@ execute:
 
 **WD-1: I can import data from a *variety* of formats (e.g., csv, xlsx, txt, etc.).**
 
--   `csv`: Lab 4 Question 0
+-   `csv`: Lab 3 Question 2
 
 ```{r}
 #| label: wd-1-csv
 
-childcare_costs <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-05-09/childcare_costs.csv')
+evals = read_csv(file = here::here("data","teacher_evals.csv"),show_col_types = FALSE)
 
-counties <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-05-09/counties.csv')
 ```
 
 -   `xlsx`: PA 4 Question 1
@@ -81,6 +80,7 @@ teacher_evals_clean |>
   count() |> # each row is a question, so counting all returns #questions asked.
   filter(n == 9) |> 
   dim()
+
 ```
 
 -   character -- specifically a string (example must use functions from **stringr**): Lab 5
@@ -107,6 +107,7 @@ ca_childcare |>
   arrange(desc(mmc_infant)) |>
   slice_tail(n = 1) |>
   select(region)
+
 ```
 
 -   date (example must use functions from **lubridate**): Lab 5
@@ -340,13 +341,6 @@ person |>
             by = join_by(id == person_id))
 ```
 
--   `full_join()`
-
-```{r}
-#| label: wd-5-full
-
-```
-
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
 
 -   `semi_join()`
@@ -354,12 +348,16 @@ person |>
 ```{r}
 #| label: wd-6-semi
 
+
+
 ```
 
 -   `anti_join()`
 
 ```{r}
 #| label: wd-6-anti
+
+
 
 ```
 
@@ -438,6 +436,7 @@ ggplot(data = surveys,
        x = "Species",
        y = "") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) # hjust = 1 so that the text doesn't go into the plot
+
 ```
 
 -   Example of **dplyr** pipeline: Lab 3 Question 9
@@ -482,10 +481,24 @@ ca_childcare |>
   select(region)
 ```
 
--   Example of function stops
+-   Example of function stops: Challenge 7 Question 2
 
 ```{r}
 #| label: r-3-function-stops
+
+replace_unlikely_vals <- function(x, x_min, x_max){
+  
+  if (!is.numeric(x) | length(x) <= 1) {
+    stop("Error: Input vector must be numeric with a length not greater than 1.")
+  }
+  
+  case_when(
+    x < x_min ~ NA,
+    x > x_max ~ NA,
+    .default = x
+  )
+  
+}
 
 ```
 
@@ -622,20 +635,40 @@ ggplot(data = teacher_evals_compare,
   scale_fill_manual(name = "SET Level", values = c("#4e82b5", "#c88500")) 
 ```
 
--   I can modify the text in my plot to be more readable: Lab 2 Question 16
+-   I can modify the text in my plot to be more readable: Lab 4 Question 6
+
+specifically the x/y scales
 
 ```{r}
 #| label: dvs-2-2
 
-ggplot(data = surveys,
-       mapping = aes(y = weight, 
-                     x = species)) + 
-  geom_boxplot(outliers = FALSE) + 
-  geom_jitter(color = 'steelblue', alpha = 0.1) + 
-  labs(title = "Rodent Weight in grams by Species",
-       x = "Species",
-       y = "") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # hjust = 1 so that the text doesn't go into the plot
+ca_childcare |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+               names_to = "age_group",
+               values_to = "mc_all") |>
+  mutate(age_group = recode(age_group, 
+                            mc_infant = "Infant", 
+                            mc_toddler = "Toddler", 
+                            mc_preschool = "Preschool")) |>
+  ggplot(mapping = aes(x = study_year,
+                       y = mc_all,
+                       color = fct_reorder2(.f = rxegion,
+                                            .x = study_year,
+                                            .y = mc_all))) + 
+  geom_point() + 
+  geom_smooth(method = "loess") + 
+  facet_wrap(~factor(age_group, 
+                     levels = c("Infant",
+                                "Toddler",
+                                "Preschool"))) + 
+  theme_bw() + 
+  labs(x = "Study Year",
+       y = "",
+       title = "Weekly Median Price for Center-Based Childcare ($)",
+       color = "California Region") + 
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) + 
+  scale_y_continuous(limits = c(100, 500))
+
 ```
 
 -   I can reorder my legend to align with the colors in my plot: Lab 4 Question 6
@@ -669,24 +702,32 @@ ca_childcare |>
        color = "California Region") + 
   scale_x_continuous(breaks = seq(2008, 2018, by = 2)) + 
   scale_y_continuous(limits = c(100, 500))
+
+
 ```
 
 **DVS-3: I show creativity in my visualizations**
 
--   I can use non-standard colors: Challenge 3 Question 2
+-   I can use non-standard colors: Lab 9 Question 3
+
+(updated colors)
 
 ```{r}
 #| label: dvs-3-1
 
-ggplot(data = teacher_evals_compare, 
-       mapping = aes(SEN_level)) +
-  geom_bar(aes(fill = SET_level)) + 
-  labs(x = "Seniority of Instructor",
+enframe(results, 
+        name = "simulation_number", 
+        value = "ncorrect") |>
+  ggplot(mapping = aes(x = ncorrect,
+                       fill = as.factor(ncorrect))) +
+  geom_bar(mapping = aes(y = after_stat(count) / sum(after_stat(count)))) +
+  labs(x = "# Babies Correctly Returned",
        y = "",
-       title = "Number of Sections") +
+       title = "Proportion of simulations where 0, 1, 2, 3, and 4 babies were returned correctly") + 
   theme_bw() +
-  theme(axis.title=element_text(size=13)) + 
-  scale_fill_manual(name = "SET Level", values = c("#4e82b5", "#c88500")) 
+  scale_fill_manual(values = c("#f55d42", "#f59342", "#f5cb42", "#bcf542", "#06d128")) +
+  theme(legend.position = "none")
+
 ```
 
 -   I can use annotations: Challenge 2
@@ -719,20 +760,26 @@ ggplot(data = survey_data,
        y = "")
 ```
 
--   I can be creative...: Lab 2 Question 16
+-   I can be creative...: Lab 9 Question 3
+
+(updated colors)
 
 ```{r}
 #| label: dvs-3-3
 
-ggplot(data = surveys,
-       mapping = aes(y = weight, 
-                     x = species)) + 
-  geom_boxplot(outliers = FALSE) + 
-  geom_jitter(color = 'steelblue', alpha = 0.1) + 
-  labs(title = "Rodent Weight in grams by Species",
-       x = "Species",
-       y = "") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # hjust = 1 so that the text doesn't go into the plot
+enframe(results, 
+        name = "simulation_number", 
+        value = "ncorrect") |>
+  ggplot(mapping = aes(x = ncorrect,
+                       fill = as.factor(ncorrect))) +
+  geom_bar(mapping = aes(y = after_stat(count) / sum(after_stat(count)))) +
+  labs(x = "# Babies Correctly Returned",
+       y = "",
+       title = "Proportion of simulations where 0, 1, 2, 3, and 4 babies were returned correctly") + 
+  theme_bw() +
+  scale_fill_manual(values = c("#f55d42", "#f59342", "#f5cb42", "#bcf542", "#06d128")) +
+  theme(legend.position = "none")
+
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -751,6 +798,7 @@ ca_childcare |>
               values_from = mmhi_2018,
               names_prefix = "mhi_") |>
   arrange(desc(mhi_2018))
+
 ```
 
 -   Example using `across()`: Lab 3 Question 6
@@ -779,6 +827,7 @@ ca_childcare |>
               values_from = mmhi_2018,
               names_prefix = "mhi_") |>
   arrange(desc(mhi_2018))
+
 ```
 
 -   Example 2: Lab 3 Question 10
@@ -797,6 +846,8 @@ teacher_evals_clean |>
 
 -   Example 1: Lab 4 Question 4
 
+(updated column names from "mhi" to "median household income")
+
 ```{r}
 #| label: dvs-6-1
 
@@ -807,11 +858,14 @@ ca_childcare |>
   pivot_wider(id_cols = region,
               names_from = study_year,
               values_from = mmhi_2018,
-              names_prefix = "mhi_") |>
-  arrange(desc(mhi_2018))
+              names_prefix = "median household income ") |>
+  arrange(desc("median household income 2018"))
+
 ```
 
 -   Example 2: Lab 3 Challenge 10
+
+(added rename function)
 
 ```{r}
 #| label: dvs-6-2
@@ -820,23 +874,48 @@ teacher_evals_clean |>
   group_by(teacher_id) |>
   filter(question_no == "901") |>
   summarise(avg_rate = mean(SET_score_avg)) |>
-  slice_min(order_by = avg_rate, n=1)
+  slice_min(order_by = avg_rate, n=1) |>
+  rename("Average Rating for Question 1" = avg_rate,
+         "Teacher ID" = teacher_id)
 ```
 
 **DVS-7: I show creativity in my tables.**
 
--   Example 1
+-   Example 1: Challenge 9 (Lab 9)
+
+(updated Cambria to Calibri)
 
 ```{r}
 #| label: dvs-7-1
 
+enframe(results, 
+        name = "simulation_number", 
+        value = "ncorrect") |>
+  count(ncorrect) |>
+  mutate(proportion = n/10000) |>
+  select("Number Returned Correctly" = ncorrect, "Proportion" = proportion) |>
+  gt() |>
+  tab_header(title = "Proportion of Simulations where Babies were Returned Correctly") |>
+  tab_style(style = list(cell_text(font = "Calibri",
+                         weight = "bold")), 
+            locations = cells_title()) |>
+  fmt_percent(columns =  Proportion)
 
 ```
 
--   Example 2
+-   Example 2: Challenge 9 (Lab 8)
 
 ```{r}
 #| label: dvs-7-2
+
+fish |>
+  map_int(.f = ~ sum(is.na(.x))) |>
+  bind_cols(Name = names(fish)) |>
+  rename(nas = 1) |>
+  pivot_wider(names_from = Name,
+              values_from = nas) |>
+  kable(format = "html") |>
+  kable_styling("striped")
 
 ```
 
@@ -884,50 +963,102 @@ teacher_evals_clean |>
                    .fns = ~ n_distinct(.x)))
 ```
 
--   `map()` functions
+-   `map()` functions: Lab 8 Question 4
 
 ```{r}
 #| label: pe-1-map-1
 
+fish |>
+  map_int(.f = ~ sum(is.na(.x))) |>
+  bind_cols(Name = names(fish)) |>
+  rename(nas = 1) |>
+  pivot_wider(names_from = Name,
+              values_from = nas) |>
+  kable(format = "html") |>
+  kable_styling("striped")
 
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
 
--   Function that operates on vectors
+-   Function that operates on vectors: Lab 7 Question 4
 
 ```{r}
 #| label: pe-2-1
 
+rescale_01 <- function(x) {
+  
+  if (!is.numeric(x) | length(x) <= 1) {
+    stop("Error: Input vector must be numeric with a length not greater than 1.")
+  }
+  
+  rng <- range(x, na.rm = TRUE)
+  
+  return((x - rng[1]) / 
+    (rng[2] - rng[1]))
+  
+}
+
 ```
 
--   Function that operates on data frames
+-   Function that operates on data frames: Challenge 7 Question 3
 
 ```{r}
 #| label: pe-2-2
+
+calculate_condition_index <- function(df, len, wt){
+  
+  df <- df |>
+    mutate(condition_index = ( {{wt}} / ( {{len}} * {{len}} * {{len}} ) * 100))
+  
+  return(df)
+    
+}
 
 ```
 
 **PE-3:I can use iteration to reduce repetition in my code.**
 
--   `across()`
+-   `across()`: Lab 7 Question 8
 
 ```{r}
 #| label: pe-3-across
 
+rescale_column <- function(df, vars){
+  df <- df |>
+    mutate(across(.cols = {{vars}},
+                     .fns = ~ rescale_01(.x)))
+  
+  return(df)
+  
+}
+
 ```
 
--   `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
+-   `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.): 
 
 ```{r}
 #| label: pe-3-map-1
 
+simulate_means <- function(n, df){
+  tibble(sim = 1:n,
+         mean = map_dbl(.x = 1:n, 
+          .f = ~rchisq(n = 100, df) %>% mean()
+          ))
+}
+
 ```
 
--   `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
+-   `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`): Lab 9 Question 6
 
 ```{r}
 #| label: pe-3-map-2
+
+all_simulations <- grid |> 
+  mutate(simulated_means = pmap(.l = list(n, df), 
+                                .f = simulate_means)
+         ) |> 
+  unnest(cols = simulated_means)
 
 ```
 
@@ -942,6 +1073,7 @@ ca_childcare <- counties |>
   filter(state_name == "California") |>
   inner_join(childcare_costs,
              by = join_by(county_fips_code == county_fips_code))
+
 ```
 
 -   I can connect a data wrangling pipeline into a `ggplot()`: Lab 4 Question 6
@@ -981,17 +1113,48 @@ ca_childcare |>
 
 **DSSM-1: I can simulate data from a *variety* of probability models.**
 
--   Example 1
+-   Example 1: Lab 9 Question 1
 
 ```{r}
 #| label: dsm-1-1
 
+randomBabies <- function(nBabies){
+  baby_data <- tibble(baby = 1:nBabies,
+                      returned = rbinom(n = nBabies, size = 1, prob = 1/nBabies))
+  
+  babies_found <- baby_data |>
+    filter(returned == 1) |>
+    nrow()
+  
+  return(babies_found)
+}
+
+results <- map_int(.x = 1:10000,
+                   .f = ~ randomBabies(nBabies = 4)
+                   )
+
 ```
 
--   Example 2
+-   Example 2: Lab 9 Question 4/5/6
 
 ```{r}
 #| label: dsm-1-2
+
+simulate_means <- function(n, df){
+  tibble(sim = 1:n,
+         mean = map_dbl(.x = 1:n, 
+          .f = ~rchisq(n = 100, df) %>% mean()
+          ))
+}
+
+grid <- crossing(n = c(10, 100, 1000, 10000), 
+                 df = 10)
+
+all_simulations <- grid |> 
+  mutate(simulated_means = pmap(.l = list(n, df), 
+                                .f = simulate_means)
+         ) |> 
+  unnest(cols = simulated_means)
 
 ```
 
