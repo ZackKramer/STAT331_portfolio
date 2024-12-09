@@ -97,16 +97,12 @@ teacher_evals_clean |>
 
 -   factor: Lab 4 Question 5
 
+(updated to use slice_min() instead of arrange() and slice_tail()
+
 ```{r}
 #| label: wd-3-factor
 
-ca_childcare |>
-  filter(study_year == 2018) |>
-  group_by(region) |>
-  summarize(mmc_infant = median(mc_infant)) |>
-  arrange(desc(mmc_infant)) |>
-  slice_tail(n = 1) |>
-  select(region)
+
 
 ```
 
@@ -136,76 +132,40 @@ teacher_evals_clean |>
   group_by(sex) |>
   summarize(distinct_vals = n_distinct(teacher_id)) |>
   mutate(distinct_vals / sum(distinct_vals) * 100)
+
 ```
 
--   character -- specifically a string (example must use functions from **stringr**): Lab 4 Question 3
-
-(modified formatting from original submission)
+-   character -- specifically a string (example must use functions from **stringr**): Lab 4 Question 6
 
 ```{r}
 #| label: wd-4-string
 
-ca_childcare <- ca_childcare |> 
-  mutate(county_name = str_remove(county_name, " County"),
-         region = fct_collapse(.f = county_name,
-                               "Superior California" = c("Butte", 
-                                                         "Colusa", 
-                                                         "El Dorado", 
-                                                         "Glenn", 
-                                                         "Lassen", 
-                                                         "Modoc", 
-                                                         "Nevada", 
-                                                         "Placer", 
-                                                         "Plumas", 
-                                                         "Sacramento", 
-                                                         "Shasta", 
-                                                         "Sierra", 
-                                                         "Siskiyou", 
-                                                         "Sutter", 
-                                                         "Tehama", 
-                                                         "Yolo", 
-                                                         "Yuba"),
-                               "North Coast" = c("Del Norte", 
-                                                 "Humboldt", 
-                                                 "Lake", 
-                                                 "Mendocino", 
-                                                 "Napa", 
-                                                 "Sonoma", 
-                                                 "Trinity"), 
-                               "San Francisco Bay Area" = c("Alameda", 
-                                                            "Contra Costa", 
-                                                            "Marin", 
-                                                            "San Francisco", 
-                                                            "San Mateo", 
-                                                            "Santa Clara", 
-                                                            "Solano"), 
-                               "Northern San Joaquin Valley" = c("Alpine", 
-                                                                 "Amador", 
-                                                                 "Calaveras", 
-                                                                 "Madera", 
-                                                                 "Mariposa", 
-                                                                 "Merced", 
-                                                                 "Mono", 
-                                                                 "San Joaquin", 
-                                                                 "Stanislaus", 
-                                                                 "Tuolumne"), 
-                               "Central Coast" = c("Monterey", 
-                                                   "San Benito", 
-                                                   "San Luis Obispo", 
-                                                   "Santa Barbara", 
-                                                   "Santa Cruz", 
-                                                   "Ventura"),
-                               "Southern San Joaquin Valley" = c("Fresno", 
-                                                                 "Inyo", 
-                                                                 "Kern", 
-                                                                 "Kings", 
-                                                                 "Tulare"),
-                               "Inland Empire" = c("Riverside", 
-                                                   "San Bernardino"), 
-                               "Los Angeles County" = c("Los Angeles"), 
-                               "Orange County" = c("Orange"),
-                               "San Diego - Imperial" = c("Imperial", 
-                                                          "San Diego")))
+ca_childcare |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+               names_to = "age_group",
+               values_to = "mc_all") |>
+  mutate(age_group = recode(age_group, 
+                            mc_infant = "Infant", 
+                            mc_toddler = "Toddler", 
+                            mc_preschool = "Preschool")) |>
+  ggplot(mapping = aes(x = study_year,
+                       y = mc_all,
+                       color = fct_reorder2(.f = region,
+                                            .x = study_year,
+                                            .y = mc_all))) + 
+  geom_point() + 
+  geom_smooth(method = "loess") + 
+  facet_wrap(~factor(age_group, 
+                     levels = c("Infant",
+                                "Toddler",
+                                "Preschool"))) + 
+  theme_bw() + 
+  labs(x = "Study Year",
+       y = "",
+       title = "Weekly Median Price for Center-Based Childcare ($)",
+       color = "California Region") + 
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) + 
+  scale_y_continuous(limits = c(100, 500))
 ```
 
 -   factor (example must use functions from **forcats**): Lab 4 Question 3
@@ -304,13 +264,14 @@ get_fit_now_member |>
   inner_join(get_fit_now_check_in,
              by = join_by(id == membership_id)) |>
   left_join(person,
-             by = join_by(person_id == id)) |>
+             by = join_by(person_id == id, name == name)) |>
   left_join(drivers_license,
-             by = join_by(license_id == id)) |>
+             by = join_by(license_id == id)) |> 
   filter(str_detect(id, pattern = "48Z"),
          check_in_date == 20180109,
          str_detect(plate_number, pattern = "H42W")) |>
-  pull(name.x)
+  pull(name, person_id)
+
 ```
 
 -   `right_join()`: Lab 5
@@ -343,21 +304,39 @@ person |>
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
 
--   `semi_join()`
+-   `semi_join()`: Lab 3 Question 12
+
+(updated to use semi_join() instead of %in%)
 
 ```{r}
 #| label: wd-6-semi
 
+degree_filter <- tibble(academic_degree = c("prof", "dr"))
 
+teacher_evals_clean |>
+  semi_join(degree_filter, by = "academic_degree") |>
+  group_by(teacher_id) |>
+  filter(sex == "female") |>
+  summarize(avg_resp = mean(resp_share)) |>
+  slice_min(order_by = avg_resp, n = 1)
 
 ```
 
--   `anti_join()`
+-   `anti_join()`: Lab 3 Question 12
+
+(updated to use anti_join() instead of %in%)
 
 ```{r}
 #| label: wd-6-anti
 
+degree_filter <- tibble(academic_degree = c("ma", "no_dgr"))
 
+teacher_evals_clean |>
+  anti_join(degree_filter, by = "academic_degree") |>
+  group_by(teacher_id) |>
+  filter(sex == "female") |>
+  summarize(avg_resp = mean(resp_share)) |>
+  slice_min(order_by = avg_resp, n = 1)
 
 ```
 
@@ -422,20 +401,21 @@ I've done this in the following provided assignments: Lab 5, Challenge 2
 
 **R-2: I can write well documented and tidy code.**
 
--   Example of **ggplot2** plotting: Lab 2 Question 16
+-   Example of **ggplot2** plotting: Lab 4 Question 7
+
+(added comments)
 
 ```{r}
 #| label: r-2-1
 
-ggplot(data = surveys,
-       mapping = aes(y = weight, 
-                     x = species)) + 
-  geom_boxplot(outliers = FALSE) + 
-  geom_jitter(color = 'steelblue', alpha = 0.1) + 
-  labs(title = "Rodent Weight in grams by Species",
-       x = "Species",
-       y = "") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # hjust = 1 so that the text doesn't go into the plot
+ggplot(data = ca_childcare, mapping = aes(x = mhi_2018,
+                                          y = mc_infant)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + # Added linear regression line to show trend
+  labs(x = "Median Household Income (2018 $)", 
+       y = "",
+       title = "Median Weekly Price for Center-Based Childcare for an Infant ($)") + 
+  theme_bw() # Changed theme to BW to make points stand out more
 
 ```
 
@@ -468,17 +448,24 @@ ggplot(data = ca_childcare, mapping = aes(x = mhi_2018,
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
 
--   Example -- any context: Lab 4 Question 5
+-   Example -- any context: Lab 7 Question 4
 
 ```{r}
 #| label: r-3-example
-ca_childcare |>
-  filter(study_year == 2018) |>
-  group_by(region) |>
-  summarize(mmc_infant = median(mc_infant)) |>
-  arrange(desc(mmc_infant)) |>
-  slice_tail(n = 1) |>
-  select(region)
+
+rescale_01 <- function(x) {
+  
+  if (!is.numeric(x) | length(x) <= 1) {
+    stop("Error: Input vector must be numeric with a length not greater than 1.")
+  }
+  
+  rng <- range(x, na.rm = TRUE)
+  
+  return((x - rng[1]) / 
+    (rng[2] - rng[1]))
+  
+}
+
 ```
 
 -   Example of function stops: Challenge 7 Question 2
@@ -519,6 +506,7 @@ ggplot(data = ca_childcare, mapping = aes(x = mhi_2018,
        y = "",
        title = "Median Weekly Price for Center-Based Childcare for an Infant ($)") + 
   theme_bw()
+
 ```
 
 -   at least one numeric variable and one categorical variable: Challenge 2
@@ -551,34 +539,20 @@ ggplot(data = survey_data,
        y = "")
 ```
 
--   at least two categorical variables: Challenge 2 spicy
+-   at least two categorical variables: Challenge 3 Question 2
 
 ```{r}
 #| label: dvs-1-2cats
 
-ggplot(data = survey_data,
-       mapping = aes(x = weight, y = species)) + 
-  geom_boxplot(aes(color = genus),
-               outliers = FALSE) + 
-  scale_colour_brewer(palette = "Set1") +
-  annotate("text", y = 1:14, x = 250, label = c("Neomota",
-                                                "Chaetodipus",
-                                                "Peromyscus",
-                                                "Perognathus",
-                                                "Reithrodontomys",
-                                                "Sigmodon",
-                                                "Onychomys",
-                                                "Peromyscus",
-                                                "Reithrodontomys",
-                                                "Dipodomys",
-                                                "Dipodomys",
-                                                "Chaetodipus",
-                                                "Dipodomys",
-                                                "Onychromys")) +
-  theme(legend.position = "none") +
-  labs(title = "Rodent Weight Distribution by Species",
-       x = "Weight (g)",
-       y = "")
+ggplot(data = teacher_evals_compare, 
+       mapping = aes(SEN_level)) +
+  geom_bar(aes(fill = SET_level)) + 
+  labs(x = "Seniority of Instructor",
+       y = "",
+       title = "Number of Sections") +
+  theme_bw() +
+  theme(axis.title=element_text(size=13)) + 
+  scale_fill_manual(name = "SET Level", values = c("#4e82b5", "#c88500"))
 
 ```
 
@@ -784,20 +758,14 @@ enframe(results,
 
 **DVS-4: I can calculate numerical summaries of variables.**
 
--   Example using `summarize()`: Lab 4 Question 4
+-   Example using `summarize()`: Lab 3 Question 6
 
 ```{r}
 #| label: dvs-4-summarize
 
-ca_childcare |>
-  filter(study_year %in% c(2008, 2018)) |>
-  group_by(region, study_year) |>
-  summarize(mmhi_2018 = median(mhi_2018)) |>
-  pivot_wider(id_cols = region,
-              names_from = study_year,
-              values_from = mmhi_2018,
-              names_prefix = "mhi_") |>
-  arrange(desc(mhi_2018))
+teacher_evals_clean |>
+  summarize(across(.cols = course_id:teacher_id,
+                   .fns = ~ n_distinct(.x)))
 
 ```
 
@@ -1168,6 +1136,7 @@ all_simulations <- grid |>
 species_mod <- aov(weight ~ species, data = surveys)
 
 summary(species_mod)
+
 ```
 
 -   Example 2: Lab 4 Question 8
@@ -1177,6 +1146,7 @@ summary(species_mod)
 
 reg_mod1 <- lm(data = ca_childcare, formula = mhi_2018 ~ mc_infant)
 summary(reg_mod1)
+
 ```
 
 ## Revising My Thinking
@@ -1197,7 +1167,9 @@ I've revised every "growing" question and several "success" questions up to Lab 
 
 <!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
 
-I've tried to experiment more with adding more to my labs than just the information necessary to answer each question. For example, I've started adding code comments (Lab 2), which is something I've never ever done in any programming course before. I've also been experimenting with aesthetics (Lab 5) that makes the html document a bit more visually appealing than the default layout - something I've also never cared to do in any other programming course.
+I've tried to experiment more with adding more to my labs than just the information necessary to answer each question. For example, I've started adding code comments (Lab 2), which is something I've never ever done in any programming course before. 
+I've also been experimenting with aesthetics (Lab 5) that makes the html document a bit more visually appealing than the default layout - something I've also never cared to do in any other programming course.
+For the original lab 8, I had tried to style all my tables using kable() from the knitr package (for some reason it didn't work with Q4 and crashed when I tried to use it for the really big table from Q2). 
 
 ## Peer Support & Collaboration
 
@@ -1211,4 +1183,5 @@ Discord feedback:
 
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
 
-I was paired with Daniel for all of the pair programming activities so far, and I think we've learned to work well together. For the first activity it was a little slow and difficult to share the weight of the assignment (I find it easier to code alone), but we've discovered eachother's strengths and weaknesses and have been able to finish each activity pretty efficiently.
+I was paired with Daniel for most of the pair programming activities, and I think we've learned to work well together. For the first activity it was a little slow and difficult to share the weight of the assignment (I find it easier to code alone), but we've discovered eachother's strengths and weaknesses and have been able to finish each activity pretty efficiently.
+I paired up with Zhi He for the later activities and discovered that he's a much different collaborator, definitely someone that would rather work alone. I found that I had to be a bit more forward and faster with my ideas to be able to contribute effectively. By our last activity we had a good dynamic and finished really quickly. 

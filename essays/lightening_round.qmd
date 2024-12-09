@@ -6,16 +6,22 @@ editor: visual
 
 **Answer each of the following questions with *one sentence* including a brief explanation.**
 
-1. Finish the sentence with another student’s name: "If [Name of Student] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
+1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
+If Eva Moylan doesn't earn an A, then nobody should, because it seemed like they asked more questions than anybody else in the Discord, so they should be pulling more than anybody on the class's collective knowledge.
 
-2. What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
+The most difficult part of the class for me was solving all of the problems using only the material learned in class, as for every other programming course I've taken solving problems using functions/methods we discover ourselves has been a key part.
 
-3. What was the easiest part of the class for you? Explain why.
+3.  What was the easiest part of the class for you? Explain why.
 
+The easiest part of the class for me was the peer reviews because efficiency and tidyness errors pop out to me really quickly and I find it easy to communicate how to improve upon them.
 
-4. What part of the class surprised or interested you the most? Explain why.
+4.  What part of the class surprised or interested you the most? Explain why.
 
+The part of the class that surprised me the most was the pair programming, as it's something I've never been forced to do before, and showed me just how difficult communicating technical concepts like programming is.
 
-5. Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+Go back through the lecture slides over and over again so that you know what all the functions are and how to use them.

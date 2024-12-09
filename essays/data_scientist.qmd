@@ -9,3 +9,5 @@ editor: visual
 -   Focus specifically on data science concepts and the skills we employed in learning them, not a laundry list of topics that you learned (those are in the syllabus, so I know them already).
 
 -   Focus on a small number of specific areas of growth for you that happened in STAT 331. Identify at least one artifact in your portfolio that illustrates each area of growth and explain how this artifact shows growth in the way you are describing.
+
+Programming, data wrangling, data visualization, and statistical analysis are four technical skills I've improved on, more specifically the thought process behind my wrangling and visualizations. Lab 5, ome of which is seen in WD-3, -4, and -5 in my portfolio, is a great example of data wrangling, as all of the code was original and implemented a variety of dplyr functions like joins, filters, and mutates. DVS-3 is a good example of how the assignments have made me extend my thinking with my visualizations, as I'm actively trying to make them clearer by adding to (color) or removing from (y-axis labels or legends) the default.
